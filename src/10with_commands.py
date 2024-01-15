@@ -7,6 +7,7 @@ from typing import Optional
 
 import discord
 from discord import app_commands
+from dolar import priceAsText
 
 #OjO! los canales NO EXISTEN hasta que tienen su primer mensaje (get_channel devuelve NONE)
 REPORT_CH_URL="https://discord.com/channels/1022540900708143195/1196556578120290455" #U: copie mirando canal de reporte
@@ -53,6 +54,10 @@ async def hello(interaction: discord.Interaction):
 	"""Says hello!"""
 	await interaction.response.send_message(f'Hi, {interaction.user.mention}')
 
+@client.tree.command()
+async def dolar(interaction: discord.Interaction):
+	"""dolar price"""
+	await interaction.response.send_message(priceAsText())
 
 @client.tree.command()
 @app_commands.describe(
