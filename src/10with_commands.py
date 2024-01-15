@@ -9,7 +9,7 @@ import discord
 from discord import app_commands
 
 #OjO! los canales NO EXISTEN hasta que tienen su primer mensaje (get_channel devuelve NONE)
-REPORT_CH_URL="https://discord.com/channels/1028994095575740506/1029003720446451773" #U: copie mirando canal de reporte
+REPORT_CH_URL="https://discord.com/channels/1022540900708143195/1196556578120290455" #U: copie mirando canal de reporte
 GUILD_ID= REPORT_CH_URL.split('/')[-2]
 REPORT_CH_ID= int(REPORT_CH_URL.split('/')[-1])
 print(f"GUILD {GUILD_ID} REPORT_CH={REPORT_CH_ID}")
@@ -95,22 +95,22 @@ async def joined(interaction: discord.Interaction, member: Optional[discord.Memb
 # It always takes an interaction as its first parameter and a Member or Message as its second parameter.
 
 # This context menu command only works on members
-@client.tree.context_menu(name='Show Join Date')
+@client.tree.context_menu(name='S_BOT Show Join Date')
 async def show_join_date(interaction: discord.Interaction, member: discord.Member):
 	# The format_dt function formats the date time into a human readable representation in the official client
 	await interaction.response.send_message(f'{member} joined at {discord.utils.format_dt(member.joined_at)}')
 
 
 # This context menu command only works on messages
-@client.tree.context_menu(name='PA testimonio')
+@client.tree.context_menu(name='S_BOT testimonio')
 async def testimonio(interaction: discord.Interaction, message: discord.Message):
 	d= {'txt': message.content, 'de': message.author, 'fh': message.created_at}
 	print(f"TESTIMONIO {d}")
 	await interaction.response.send_message(
-		f'Guarde el testimonio', ephemeral=True
+		f'Guarde el testimonio (simulado, ver consola del bot)', ephemeral=True
 	)
 
-@client.tree.context_menu(name='PA Reportar')
+@client.tree.context_menu(name='S_BOT Reportar')
 async def report_message(interaction: discord.Interaction, message: discord.Message):
 	# We're sending this response message with ephemeral=True, so only the command executor can see it
 	await interaction.response.send_message(
