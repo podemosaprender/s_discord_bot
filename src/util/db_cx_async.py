@@ -6,6 +6,7 @@ from sqlmodel import SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError #U: reexport for try:except:
 
 sqlite_file_name = cfg_for("DB_SQLITE_PATH","xdatabase.db") #A: if DB_URL not defined
 db_url = cfg_for("DB_URL", f"sqlite+aiosqlite:///{sqlite_file_name}")

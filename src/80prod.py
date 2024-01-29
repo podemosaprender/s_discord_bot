@@ -10,8 +10,9 @@ from typing import Optional
 import discord
 from discord import app_commands
 
+from util.logging import logm
 from dolar import priceAsText
-from util.db_cx_async import db_init, save_instance
+from util.db_cx_async import db_init, save_instance, IntegrityError
 from charlas_app.models import Recorte
 
 
@@ -19,7 +20,7 @@ from charlas_app.models import Recorte
 REPORT_CH_URL= cfg_for('DISCORD_REPORT_CHANNEL_URL') #U: copie mirando canal de reporte #XXX:MULTISERVIDOR?
 GUILD_ID= REPORT_CH_URL.split('/')[-2]
 REPORT_CH_ID= int(REPORT_CH_URL.split('/')[-1])
-print(f"GUILD {GUILD_ID} REPORT_CH={REPORT_CH_ID}")
+logm(f"GUILD {GUILD_ID} REPORT_CH={REPORT_CH_ID}")
 
 MY_GUILD = discord.Object(id=GUILD_ID)  # replace with your guild id
 
@@ -40,8 +41,7 @@ client = MyClient(intents=intents)
 
 @client.event
 async def on_ready():
-	print(f'Logged in as {client.user} (ID: {client.user.id})')
-	print('------')
+	logm(f'Logged in as {client.user} (ID: {client.user.id})')
 
 @client.tree.command()
 async def dolar(interaction: discord.Interaction):
@@ -53,22 +53,28 @@ async def dolar(interaction: discord.Interaction):
 async def testimonio(interaction: discord.Interaction, message: discord.Message):
 	"""XXX: DOC save data"""
 	result= "ERROR: message was not saved" #DFLT
+	data= None
 	try:
-		d= {
+		data= {
 			'txt': message.content, 
 			'author_id': str(message.author.id), 
 			'author_name': message.author.name, 
-			'msg_dt': message.created_at, 
+			'msg_dt': message.edited_at or message.created_at,
 			'msg_id': str(message.id), 
+			'channel_id': str(message.channel.id),
+			'channel_name': message.channel.name,
 			'saved_by_id': str(interaction.user.id),
 			'saved_by_name': interaction.user.name,
 		}
-		print(f"RECORTE {d}") 
-		recorte= Recorte.model_validate(d);
+		logm(f"RECORTE",l=8,data=data) 
+		recorte= Recorte.model_validate(data);
 		await save_instance(recorte)
 		result="Recorte guardado!" #XXX: link?
+	except IntegrityError as iex:
+		logm("ERROR recorte existente",l=7,data=data, ex_t=type(iex), ex=iex)
+		result="Ya estaba guardado!"
 	except Exception as ex:
-		print("ERROR recorte",d,ex)
+		logm("ERROR recorte", data=data, ex_t=type(ex), ex=iex)
 
 	await interaction.response.send_message( result, ephemeral=True)
 
