@@ -1,8 +1,9 @@
 #INFO: los comandos que queremos en la version productiva
 #XXX: generalizar/hacer extensible
 
-import os
-TOKEN = os.getenv('DISCORD_TOKEN')
+from util.cfg import cfg_init, cfg_for
+cfg_init()
+TOKEN = cfg_for('DISCORD_TOKEN')
 
 from typing import Optional
 
@@ -11,7 +12,7 @@ from discord import app_commands
 from dolar import priceAsText
 
 #OjO! los canales NO EXISTEN hasta que tienen su primer mensaje (get_channel devuelve NONE)
-REPORT_CH_URL="https://discord.com/channels/1022540900708143195/1196556578120290455" #U: copie mirando canal de reporte
+REPORT_CH_URL= cfg_for('DISCORD_REPORT_CHANNEL_URL') #U: copie mirando canal de reporte #XXX:MULTISERVIDOR?
 GUILD_ID= REPORT_CH_URL.split('/')[-2]
 REPORT_CH_ID= int(REPORT_CH_URL.split('/')[-1])
 print(f"GUILD {GUILD_ID} REPORT_CH={REPORT_CH_ID}")
@@ -42,5 +43,9 @@ async def dolar(interaction: discord.Interaction):
 	"""dolar price"""
 	await interaction.response.send_message(priceAsText())
 
-print(TOKEN)
+@client.tree.command()
+async def xtest(interaction: discord.Interaction):
+	"""just reply, test"""
+	await interaction.response.send_message("test ok")
+
 client.run(TOKEN)
