@@ -43,6 +43,16 @@ async def dolar(interaction: discord.Interaction):
 	"""dolar price"""
 	await interaction.response.send_message(priceAsText())
 
+# This context menu command only works on messages
+@client.tree.context_menu(name='Coleccionar', guild= MY_GUILD)
+async def testimonio(interaction: discord.Interaction, message: discord.Message):
+	"""XXX: DOC save data"""
+	d= {'txt': message.content, 'de': message.author, 'fh': message.created_at, 'msg_id': message.id, 'user_save': interaction.user.name}
+	print(f"TESTIMONIO {d}") #XXX: implementar 
+	await interaction.response.send_message(
+		f'Guarde el testimonio (simulado, ver consola del bot)', ephemeral=True
+	)
+
 @client.tree.command()
 async def xtest(interaction: discord.Interaction):
 	"""just reply, test"""
