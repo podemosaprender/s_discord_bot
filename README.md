@@ -8,7 +8,13 @@ FROM: https://realpython.com/how-to-make-a-discord-bot-python/#how-to-make-a-dis
 ~~~
 python -mvenv xenvbot
 . xenvbot/bin/activate
-pip install -r requirements.txt
+python requirements.py
+
+On Windows use
+~~~
+python requirements.py
+. xfastapi/Scripts/activate
+~~~
 
 export DISCORD_TOKEN="the token you got from creating the bot on discord"
 python src/10commands.py
