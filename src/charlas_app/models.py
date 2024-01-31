@@ -22,6 +22,7 @@ class Recorte(SQLModel, table=True): #U: Mensaje guardado de Discord Boton
 	author_name: str
 	channel_id: str
 	channel_name: str
+	tags: str
 	txt: str 
 
 
