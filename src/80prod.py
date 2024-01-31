@@ -15,6 +15,22 @@ from dolar import priceAsText
 from util.db_cx_async import db_init, save_instance, IntegrityError
 from charlas_app.models import Recorte
 
+#XXX:LIB{
+import datetime
+def datetime_without_tz(dt):  #U: e.g postgres require SIN tzinfo
+	return dt.replace(tzinfo=None)
+
+def datetime_with_tz(dt):  #U: add tzinfo
+	logm("datetime_with_tz",l=9, dt=dt, tzinfo=dt.tzinfo)
+	if ( 
+		dt.tzinfo == None 
+		or dt.tzinfo.utcoffset(dt) == None
+	):
+		return dt.replace(tzinfo=datetime.timezone.utc)
+	else:
+		return dt
+
+#XXX:LIB}
 
 #OjO! los canales NO EXISTEN hasta que tienen su primer mensaje (get_channel devuelve NONE)
 REPORT_CH_URL= cfg_for('DISCORD_REPORT_CHANNEL_URL') #U: copie mirando canal de reporte #XXX:MULTISERVIDOR?
@@ -57,7 +73,7 @@ async def coleccionar_save(message, interaction, tags=''): #U: La llaman otras f
 			'tags': tags,
 			'author_id': str(message.author.id), 
 			'author_name': message.author.name, 
-			'msg_dt': message.edited_at or message.created_at,
+			'msg_dt': datetime_without_tz( message.edited_at or message.created_at ),
 			'msg_id': str(message.id), 
 			'channel_id': str(message.channel.id),
 			'channel_name': message.channel.name,
