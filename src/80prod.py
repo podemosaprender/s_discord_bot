@@ -11,25 +11,12 @@ import discord
 from discord import app_commands, ui
 
 from util.logging import logm
-from dolar import priceAsText
+from util.date_util import datetime_without_tz
 from util.db_cx_async import db_init, save_instance, IntegrityError
 from charlas_app.models import Recorte
+from dolar import priceAsText
 
 #XXX:LIB{
-import datetime
-def datetime_without_tz(dt):  #U: e.g postgres require SIN tzinfo
-	return dt.replace(tzinfo=None)
-
-def datetime_with_tz(dt):  #U: add tzinfo
-	logm("datetime_with_tz",l=9, dt=dt, tzinfo=dt.tzinfo)
-	if ( 
-		dt.tzinfo == None 
-		or dt.tzinfo.utcoffset(dt) == None
-	):
-		return dt.replace(tzinfo=datetime.timezone.utc)
-	else:
-		return dt
-
 #XXX:LIB}
 
 #OjO! los canales NO EXISTEN hasta que tienen su primer mensaje (get_channel devuelve NONE)
