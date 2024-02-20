@@ -1,5 +1,6 @@
 #INFO: los comandos que queremos en la version productiva
 #XXX: generalizar/hacer extensible
+import re
 
 from util.cfg import cfg_init, cfg_for
 cfg_init()
@@ -9,6 +10,7 @@ from typing import Optional
 
 import discord
 from discord import app_commands, ui
+from discord.ext import commands
 
 from util.logging import logm
 from util.date_util import datetime_without_tz
@@ -27,16 +29,18 @@ logm(f"GUILD {GUILD_ID} REPORT_CH={REPORT_CH_ID}")
 
 MY_GUILD = discord.Object(id=GUILD_ID)  # replace with your guild id
 
+#SEE: https://github.com/Rapptz/discord.py/blob/v2.3.2/examples/advanced_startup.py
 class MyClient(discord.Client):
 	def __init__(self, *, intents: discord.Intents):
 		super().__init__(intents=intents)
 		self.tree = app_commands.CommandTree(self)
 
 	async def setup_hook(self):
-		# This copies the global commands over to your guild.
 		await db_init() #XXX:replace with alembic?
+
 		self.tree.copy_global_to(guild=MY_GUILD)
 		await self.tree.sync(guild=MY_GUILD)
+		#A: global commands copied over to your guild.
 
 intents = discord.Intents.default()
 client = MyClient(intents=intents)
@@ -50,7 +54,36 @@ async def dolar(interaction: discord.Interaction):
 	"""dolar price"""
 	await interaction.response.send_message(priceAsText())
 
-# This context menu command only works on messages
+#S: LOGIN y USUARIOS {
+@client.event
+async def on_message(message):
+	isMine= message.author == client.user
+	isDM= isinstance(message.channel, discord.channel.DMChannel)
+	m= re.match(r'^\s*/?(\S+)\s*(.*)', message.content)
+	cmd= m.group(1).lower() if not m is None else ''
+	logm("on message", isMine=isMine, isDM=isDM, cmd=cmd, author=message.author, content=message.content)
+
+	if isMine or not isDM or cmd=='':
+		return 
+	#A: avoid loops, we handle non-direct messages with command
+
+	cmd_rest= m.group(2)
+	if cmd=='hola':
+		await message.channel.send('Hola, soy el Bot de PodemosAprender!')
+	else:
+		await message.channel.send('Hola, soy el Bot de PodemosAprender. Te ayudo?')
+
+
+#XXX:WIP update code to use Bot instead of Client, so we can add commands like below 
+#SEE: https://github.com/Rapptz/discord.py/blob/v2.3.2/examples/advanced_startup.py
+@client.tree.command()
+@commands.dm_only() #SEE: https://discordpy.readthedocs.io/en/latest/ext/commands/api.html#discord.ext.commands.dm_only
+async def token(ctx):
+	logm("token",ctx=ctx)
+
+#S: LOGIN y USUARIOS }
+
+#S: COLECCIONAR {
 async def coleccionar_save(message, interaction, tags=''): #U: La llaman otras funciones para guardar mensajes
 	result= "ERROR: message was not saved" #DFLT
 	data= None
@@ -97,6 +130,7 @@ class ColeccionarModal(ui.Modal):
 async def coleccionar(interaction: discord.Interaction, message: discord.Message): #U: Menu contextual para el mensaje, coleccionar
 	"""Coleccionar este mensaje"""
 	await interaction.response.send_modal(ColeccionarModal(message)) #A: Mostramos modal para preguntar los tags
+#S: COLECCIONAR }
 
 @client.tree.command()
 async def xtest(interaction: discord.Interaction): #U: Lo dejamos para testear si funciona
